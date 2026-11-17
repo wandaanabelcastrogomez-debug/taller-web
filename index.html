@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller Web</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Concepto: banco de trabajo. Lecciones a la izquierda, editor y vista previa a la derecha, como una mesa de taller. */
+:root {
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface-2: #e4e9f1;
+  --code-bg: #fbfcfe;
+  --fg: #19212f;
+  --muted: #566176;
+  --line: #cfd7e3;
+  --accent: #2b55d6;
+  --accent-fg: #ffffff;
+  --html: #c9481a;
+  --css: #1f6fc4;
+  --js: #946700;
+  --final: #6a3fc4;
+  --good: #1d7a4a;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10141c; --surface: #181e2a; --surface-2: #222a39; --code-bg: #0d1118;
+    --fg: #e6ebf4; --muted: #9aa6bb; --line: #2c3547;
+    --accent: #7c9cff; --accent-fg: #0d1118;
+    --html: #ff8a5c; --css: #6fb4ff; --js: #e9bd4a; --final: #b79cff; --good: #62d39a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10141c; --surface: #181e2a; --surface-2: #222a39; --code-bg: #0d1118;
+  --fg: #e6ebf4; --muted: #9aa6bb; --line: #2c3547;
+  --accent: #7c9cff; --accent-fg: #0d1118;
+  --html: #ff8a5c; --css: #6fb4ff; --js: #e9bd4a; --final: #b79cff; --good: #62d39a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+  padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+header h1 { font-family: var(--font-display); font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.1; margin: 0 0 6px; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); max-width: 62ch; }
+.steps { display: flex; flex-wrap: wrap; gap: 8px; }
+.step {
+  font: inherit; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--fg);
+}
+.step:hover { border-color: var(--accent); }
+.step .n { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.step .t { font-weight: 600; }
+.step .s { font-size: 12px; color: var(--muted); }
+.step[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.step[aria-current="true"] .n, .step[aria-current="true"] .s { color: inherit; opacity: .85; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 940px) { .grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+.lesson { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.lesson h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 0; text-wrap: balance; }
+.lesson p { margin: 0; }
+.lesson code, .lesson .tag { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
+.label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+.concepts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; margin: 0; padding: 0; list-style: none; }
+.concepts li { display: contents; }
+.concepts .tag { justify-self: start; align-self: start; white-space: nowrap; }
+.challenge { border-top: 1px solid var(--line); padding-top: 14px; }
+.challenge ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  font: inherit; font-weight: 600; cursor: pointer; padding: 8px 14px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.bench { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; }
+.tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 6px 8px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.tab {
+  font: inherit; font-family: var(--font-mono); font-size: 13px; cursor: pointer;
+  padding: 6px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted);
+  display: flex; align-items: center; gap: 7px;
+}
+.tab i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.tab[data-tab="html"] i { background: var(--html); }
+.tab[data-tab="css"] i { background: var(--css); }
+.tab[data-tab="js"] i { background: var(--js); }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--fg); }
+.spacer { flex: 1; }
+.status { font-size: 12px; color: var(--good); padding-right: 6px; }
+textarea {
+  display: block; width: 100%; height: 300px; resize: vertical; border: 0; outline: none;
+  padding: 14px; background: var(--code-bg); color: var(--fg);
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.6; tab-size: 2; white-space: pre; overflow: auto;
+}
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.preview-head { padding: 8px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+iframe { display: block; width: 100%; height: 340px; border: 0; background: #ffffff; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toast { font-size: 13px; color: var(--muted); min-height: 1.4em; }
+.howto { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; }
+.howto ol { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+/* Color por lección: --lc lo fija el script según la lección activa */
+.rainbow { display: flex; height: 6px; width: 220px; max-width: 100%; border-radius: 3px; overflow: hidden; margin-top: 14px; }
+.rainbow i { flex: 1; display: block; }
+.rainbow i:nth-child(1) { background: var(--html); }
+.rainbow i:nth-child(2) { background: var(--css); }
+.rainbow i:nth-child(3) { background: var(--js); }
+.rainbow i:nth-child(4) { background: var(--final); }
+.step { border-top: 4px solid var(--sc, var(--line)); }
+.step:hover { border-color: var(--sc, var(--accent)); }
+.step .n { color: var(--sc, var(--muted)); font-weight: 600; }
+.step[aria-current="true"] { background: var(--sc, var(--accent)); border-color: var(--sc, var(--accent)); color: var(--accent-fg); }
+.step[aria-current="true"] .n { color: inherit; }
+.lesson { border-top: 5px solid var(--lc, var(--accent)); background: color-mix(in srgb, var(--lc, var(--accent)) 6%, var(--surface)); }
+.lesson .label { color: var(--lc, var(--muted)); }
+.concepts .tag { background: color-mix(in srgb, var(--lc, var(--accent)) 18%, var(--surface)); color: var(--fg); }
+.challenge { border-top: 2px dashed color-mix(in srgb, var(--lc, var(--accent)) 50%, var(--line)); }
+.btn:hover { border-color: var(--lc, var(--accent)); }
+.btn.primary { background: var(--lc, var(--accent)); border-color: var(--lc, var(--accent)); color: var(--accent-fg); }
+.tabs, .preview-head { background: color-mix(in srgb, var(--lc, var(--accent)) 12%, var(--surface-2)); }
+.tab[data-tab="html"] { --tc: var(--html); }
+.tab[data-tab="css"] { --tc: var(--css); }
+.tab[data-tab="js"] { --tc: var(--js); }
+.tab[aria-selected="true"] { box-shadow: inset 0 -3px 0 var(--tc); }
+.howto { border-left: 5px solid var(--final); }
+.howto .label { color: var(--final); }
+:focus-visible { outline-color: var(--lc, var(--accent)); }
+@media (prefers-reduced-motion: no-preference) { .step, .btn { transition: border-color .15s, background .15s; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Taller Web</h1>
+    <p>Aprende a crear una página web con HTML, CSS y JavaScript. Elige una lección, edita el código y mira el resultado al instante.</p>
+    <div class="rainbow" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  </header>
+
+  <nav class="steps" id="steps" aria-label="Lecciones"></nav>
+
+  <div class="grid">
+    <article class="lesson" id="lesson"></article>
+
+    <section class="bench" aria-label="Editor">
+      <div class="panel">
+        <div class="tabs" role="tablist" id="tabs">
+          <button class="tab" role="tab" data-tab="html" id="tab-html"><i></i>index.html</button>
+          <button class="tab" role="tab" data-tab="css" id="tab-css"><i></i>estilos.css</button>
+          <button class="tab" role="tab" data-tab="js" id="tab-js"><i></i>script.js</button>
+          <span class="spacer"></span>
+          <span class="status" id="status">Vista previa al día</span>
+        </div>
+        <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Código"></textarea>
+      </div>
+
+      <div class="panel">
+        <div class="preview-head"><span>Vista previa</span><span id="size">Se actualiza mientras escribes</span></div>
+        <iframe id="preview" title="Vista previa de tu página" sandbox="allow-scripts"></iframe>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="copy-all">Copiar archivo completo</button>
+        <button class="btn" id="reset">Restablecer esta lección</button>
+        <span class="toast" id="toast" role="status"></span>
+      </div>
+    </section>
+  </div>
+
+  <section class="howto">
+    <p class="label">Cómo publicar tu página</p>
+    <ol>
+      <li>Pulsa <strong>Copiar archivo completo</strong>. Reúne el HTML, el CSS y el JavaScript en un solo documento.</li>
+      <li>Pégalo en un editor de texto (Bloc de notas, VS Code) y guárdalo como <code>index.html</code>.</li>
+      <li>Haz doble clic en el archivo para verlo en tu navegador.</li>
+      <li>Para ponerlo en internet, sube <code>index.html</code> a un servicio gratuito como GitHub Pages o Netlify.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+var LESSONS = [
+  {
+    id: 'html', n: 1, name: 'HTML', sub: 'La estructura', tab: 'html',
+    intro: '<p>HTML describe <strong>qué contiene</strong> la página: títulos, párrafos, listas, enlaces e imágenes. Cada elemento va entre una etiqueta de apertura y una de cierre, por ejemplo <code>&lt;p&gt;Hola&lt;/p&gt;</code>.</p>',
+    concepts: [
+      ['<h1>', 'Título principal. Usa <h2> y <h3> para subtítulos.'],
+      ['<p>', 'Un párrafo de texto.'],
+      ['<ul> y <li>', 'Lista con viñetas y cada uno de sus elementos.'],
+      ['<a href>', 'Enlace hacia otra página.'],
+      ['<img src>', 'Imagen. El atributo alt la describe.']
+    ],
+    challenge: ['Cambia el título por tu nombre.', 'Añade un tercer elemento a la lista.', 'Crea un enlace a tu sitio favorito.'],
+    code: {
+      html: '<h1>Hola, soy Ana</h1>\n<p>Esta es mi primera página web.</p>\n\n<h2>Mis intereses</h2>\n<ul>\n  <li>Fotografía</li>\n  <li>Música</li>\n</ul>\n\n<p>Visita <a href="https://es.wikipedia.org" target="_blank">Wikipedia</a>.</p>',
+      css: '',
+      js: ''
+    }
+  },
+  {
+    id: 'css', n: 2, name: 'CSS', sub: 'El aspecto', tab: 'css',
+    intro: '<p>CSS decide <strong>cómo se ve</strong> cada elemento. Una regla tiene un selector y declaraciones: <code>p { color: navy; }</code> cambia el color de todos los párrafos.</p>',
+    concepts: [
+      ['color', 'Color del texto. <background> pinta el fondo.'],
+      ['font-family', 'Tipo de letra. font-size define su tamaño.'],
+      ['padding y margin', 'Espacio interior y espacio exterior.'],
+      ['border-radius', 'Esquinas redondeadas.'],
+      ['display: flex', 'Coloca elementos en fila y los alinea.']
+    ],
+    challenge: ['Cambia el color de fondo de la tarjeta.', 'Sube el valor de border-radius hasta 24px.', 'Haz el botón más grande con padding.'],
+    code: {
+      html: '<div class="tarjeta">\n  <h1>Café Aurora</h1>\n  <p>Tostado en casa, todos los días desde las 7 a. m.</p>\n  <a class="boton" href="#">Ver el menú</a>\n</div>',
+      css: 'body {\n  font-family: Georgia, serif;\n  background: #e8eef7;\n  display: grid;\n  place-items: center;\n  min-height: 100vh;\n  margin: 0;\n}\n\n.tarjeta {\n  background: white;\n  padding: 32px;\n  border-radius: 12px;\n  max-width: 320px;\n  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);\n}\n\nh1 {\n  margin-top: 0;\n  color: #2b3a67;\n}\n\n.boton {\n  display: inline-block;\n  background: #2b3a67;\n  color: white;\n  padding: 10px 18px;\n  border-radius: 6px;\n  text-decoration: none;\n}\n\n.boton:hover {\n  background: #4a5fa5;\n}',
+      js: ''
+    }
+  },
+  {
+    id: 'js', n: 3, name: 'JavaScript', sub: 'La interacción', tab: 'js',
+    intro: '<p>JavaScript hace que la página <strong>reaccione</strong>: a un clic, a una tecla, a un formulario. Se busca un elemento, se escucha un evento y se cambia algo.</p>',
+    concepts: [
+      ['let', 'Guarda un valor que puede cambiar.'],
+      ['getElementById', 'Busca un elemento por su id.'],
+      ['addEventListener', 'Ejecuta una función cuando ocurre un evento, como click.'],
+      ['textContent', 'Lee o cambia el texto de un elemento.'],
+      ['if / else', 'Decide qué hacer según una condición.']
+    ],
+    challenge: ['Haz que cada clic sume 5 en lugar de 1.', 'Muestra "¡Meta!" cuando el total llegue a 10.', 'Añade un botón que reste uno.'],
+    code: {
+      html: '<h1>Contador de clics</h1>\n<p>Llevas <strong id="total">0</strong> clics.</p>\n<button id="sumar">Sumar uno</button>\n<button id="reiniciar" class="sec">Reiniciar</button>',
+      css: 'body {\n  font-family: system-ui, sans-serif;\n  text-align: center;\n  padding: 32px 16px;\n}\n\nstrong {\n  font-size: 2.4rem;\n  display: block;\n  margin: 8px 0;\n}\n\nbutton {\n  font-size: 1rem;\n  padding: 10px 18px;\n  border: 0;\n  border-radius: 8px;\n  background: #2b55d6;\n  color: white;\n  cursor: pointer;\n}\n\n.sec {\n  background: #d7deea;\n  color: #19212f;\n}',
+      js: 'let total = 0;\nconst salida = document.getElementById("total");\n\ndocument.getElementById("sumar").addEventListener("click", function () {\n  total = total + 1;\n  salida.textContent = total;\n});\n\ndocument.getElementById("reiniciar").addEventListener("click", function () {\n  total = 0;\n  salida.textContent = total;\n});'
+    }
+  },
+  {
+    id: 'final', n: 4, name: 'Proyecto', sub: 'Todo junto', tab: 'html',
+    intro: '<p>Una lista de tareas que usa las tres piezas: <strong>HTML</strong> para la estructura, <strong>CSS</strong> para el diseño y <strong>JavaScript</strong> para añadir tareas, tacharlas y cambiar el tema.</p>',
+    concepts: [
+      ['createElement', 'Crea un elemento nuevo desde JavaScript.'],
+      ['classList.toggle', 'Añade o quita una clase CSS.'],
+      ['variables CSS', 'Definen colores una vez y los reutilizan.'],
+      ['submit', 'Evento de un formulario al enviarlo.']
+    ],
+    challenge: ['Cambia los colores en :root.', 'Añade un contador de tareas pendientes.', 'Cambia el título por el nombre de tu proyecto.'],
+    code: {
+      html: '<main>\n  <header>\n    <h1>Mis tareas</h1>\n    <button id="tema" type="button">Tema oscuro</button>\n  </header>\n\n  <form id="formulario">\n    <input id="nueva" type="text" placeholder="Escribe una tarea" required>\n    <button type="submit">Añadir</button>\n  </form>\n\n  <ul id="lista">\n    <li>Aprender HTML</li>\n    <li class="hecha">Probar el editor</li>\n  </ul>\n</main>',
+      css: ':root {\n  --fondo: #f4f6fb;\n  --tarjeta: #ffffff;\n  --texto: #19212f;\n  --acento: #2b55d6;\n}\n\nbody.oscuro {\n  --fondo: #11151d;\n  --tarjeta: #1b2230;\n  --texto: #e6ebf4;\n  --acento: #7c9cff;\n}\n\nbody {\n  margin: 0;\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  padding: 24px 16px;\n}\n\nmain {\n  max-width: 420px;\n  margin: 0 auto;\n  background: var(--tarjeta);\n  padding: 20px;\n  border-radius: 12px;\n}\n\nheader {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 8px;\n}\n\nh1 { font-size: 1.3rem; margin: 0; }\n\nform { display: flex; gap: 8px; margin: 16px 0; }\n\ninput {\n  flex: 1;\n  padding: 8px 10px;\n  border: 1px solid #9aa6bb;\n  border-radius: 6px;\n  font: inherit;\n  min-width: 0;\n}\n\nbutton {\n  font: inherit;\n  padding: 8px 12px;\n  border: 0;\n  border-radius: 6px;\n  background: var(--acento);\n  color: white;\n  cursor: pointer;\n}\n\nul { list-style: none; padding: 0; margin: 0; }\n\nli {\n  padding: 10px 4px;\n  border-bottom: 1px solid #9aa6bb55;\n  cursor: pointer;\n}\n\nli.hecha {\n  text-decoration: line-through;\n  opacity: 0.55;\n}',
+      js: 'const lista = document.getElementById("lista");\nconst formulario = document.getElementById("formulario");\nconst campo = document.getElementById("nueva");\nconst botonTema = document.getElementById("tema");\n\n// Tachar o destachar una tarea al hacer clic\nfunction alternar(evento) {\n  evento.target.classList.toggle("hecha");\n}\n\nfor (const item of lista.children) {\n  item.addEventListener("click", alternar);\n}\n\n// Añadir una tarea nueva\nformulario.addEventListener("submit", function (evento) {\n  evento.preventDefault();\n  const texto = campo.value.trim();\n  if (texto === "") return;\n\n  const item = document.createElement("li");\n  item.textContent = texto;\n  item.addEventListener("click", alternar);\n  lista.appendChild(item);\n\n  campo.value = "";\n  campo.focus();\n});\n\n// Cambiar entre tema claro y oscuro\nbotonTema.addEventListener("click", function () {\n  const oscuro = document.body.classList.toggle("oscuro");\n  botonTema.textContent = oscuro ? "Tema claro" : "Tema oscuro";\n});'
+    }
+  }
+];
+
+var state = { current: 0, tab: 'html', code: {} };
+LESSONS.forEach(function (l) { state.code[l.id] = { html: l.code.html, css: l.code.css, js: l.code.js }; });
+
+var el = {
+  steps: document.getElementById('steps'),
+  lesson: document.getElementById('lesson'),
+  tabs: document.getElementById('tabs'),
+  editor: document.getElementById('editor'),
+  preview: document.getElementById('preview'),
+  status: document.getElementById('status'),
+  toast: document.getElementById('toast')
+};
+
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function buildDoc(c) {
+  return '<!doctype html>\n<html lang="es">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Mi página</title>\n<style>\n' +
+    c.css + '\n</style>\n</head>\n<body>\n' + c.html + '\n' +
+    (c.js.trim() ? '<script>\n' + c.js + '\n<\/script>\n' : '') + '</body>\n</html>';
+}
+
+function renderSteps() {
+  el.steps.innerHTML = '';
+  LESSONS.forEach(function (l, i) {
+    var b = document.createElement('button');
+    b.className = 'step';
+    b.setAttribute('aria-current', i === state.current ? 'true' : 'false');
+    b.style.setProperty('--sc', 'var(--' + l.id + ')');
+    b.innerHTML = '<span class="n">' + l.n + '</span><span><span class="t">' + esc(l.name) + '</span><br><span class="s">' + esc(l.sub) + '</span></span>';
+    b.addEventListener('click', function () { selectLesson(i); });
+    el.steps.appendChild(b);
+  });
+}
+
+function renderLesson() {
+  var l = LESSONS[state.current];
+  var concepts = l.concepts.map(function (c) {
+    return '<li><span class="tag">' + esc(c[0]) + '</span><span>' + esc(c[1]) + '</span></li>';
+  }).join('');
+  var tasks = l.challenge.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+  var next = state.current < LESSONS.length - 1
+    ? '<button class="btn primary" id="next">Siguiente: ' + esc(LESSONS[state.current + 1].name) + '</button>' : '';
+  var prev = state.current > 0
+    ? '<button class="btn" id="prev">Anterior</button>' : '';
+  el.lesson.innerHTML =
+    '<div><p class="label">Lección ' + l.n + ' de ' + LESSONS.length + '</p><h2>' + esc(l.name) + ': ' + esc(l.sub.toLowerCase()) + '</h2></div>' +
+    l.intro +
+    '<div><p class="label">Lo esencial</p><ul class="concepts">' + concepts + '</ul></div>' +
+    '<div class="challenge"><p class="label">Pruébalo tú</p><ul>' + tasks + '</ul></div>' +
+    '<div class="row">' + prev + next + '</div>';
+  var n = document.getElementById('next'), p = document.getElementById('prev');
+  if (n) n.addEventListener('click', function () { selectLesson(state.current + 1); });
+  if (p) p.addEventListener('click', function () { selectLesson(state.current - 1); });
+}
+
+function renderTabs() {
+  Array.prototype.forEach.call(el.tabs.querySelectorAll('.tab'), function (t) {
+    t.setAttribute('aria-selected', t.getAttribute('data-tab') === state.tab ? 'true' : 'false');
+  });
+}
+
+function loadEditor() {
+  var id = LESSONS[state.current].id;
+  el.editor.value = state.code[id][state.tab];
+  renderTabs();
+}
+
+function updatePreview() {
+  var id = LESSONS[state.current].id;
+  el.preview.srcdoc = buildDoc(state.code[id]);
+  el.status.textContent = 'Vista previa al día';
+}
+
+function selectLesson(i) {
+  state.current = i;
+  state.tab = LESSONS[i].tab;
+  document.querySelector('.wrap').style.setProperty('--lc', 'var(--' + LESSONS[i].id + ')');
+  renderSteps(); renderLesson(); loadEditor(); updatePreview();
+  el.toast.textContent = '';
+}
+
+var timer = null;
+el.editor.addEventListener('input', function () {
+  var id = LESSONS[state.current].id;
+  state.code[id][state.tab] = el.editor.value;
+  el.status.textContent = 'Actualizando…';
+  clearTimeout(timer);
+  timer = setTimeout(updatePreview, 350);
+});
+
+el.editor.addEventListener('keydown', function (e) {
+  if (e.key === 'Tab' && !e.shiftKey) {
+    e.preventDefault();
+    var s = el.editor.selectionStart, end = el.editor.selectionEnd;
+    el.editor.value = el.editor.value.slice(0, s) + '  ' + el.editor.value.slice(end);
+    el.editor.selectionStart = el.editor.selectionEnd = s + 2;
+    el.editor.dispatchEvent(new Event('input'));
+  }
+});
+
+el.tabs.addEventListener('click', function (e) {
+  var t = e.target.closest('.tab');
+  if (!t) return;
+  state.tab = t.getAttribute('data-tab');
+  loadEditor();
+});
+
+document.getElementById('reset').addEventListener('click', function () {
+  var l = LESSONS[state.current];
+  state.code[l.id] = { html: l.code.html, css: l.code.css, js: l.code.js };
+  loadEditor(); updatePreview();
+  el.toast.textContent = 'Lección restablecida.';
+});
+
+document.getElementById('copy-all').addEventListener('click', function () {
+  var text = buildDoc(state.code[LESSONS[state.current].id]);
+  var fallback = function () {
+    state.tab = 'html';
+    el.editor.value = text;
+    el.editor.focus(); el.editor.select();
+    el.toast.textContent = 'Selecciona y copia el texto del editor. Pulsa la pestaña para volver.';
+  };
+  try {
+    navigator.clipboard.writeText(text).then(function () {
+      el.toast.textContent = 'Copiado. Pégalo en un archivo llamado index.html.';
+    }, fallback);
+  } catch (err) { fallback(); }
+});
+
+selectLesson(0);
+</script>
+</body>
+</html>
